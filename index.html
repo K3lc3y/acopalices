@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SINAL DE SOBREVIVÊNCIA // PORTAL CAPTIVO</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fontes Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #080505;
+            color: #d1d5db;
+            overflow-x: hidden;
+        }
+
+        h1, h2, .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Fundo com efeito de poeira/brasa e grade cibernética pós-apocalíptica */
+        .apocalypse-bg {
+            background: radial-gradient(circle at center, rgba(35, 10, 5, 0.85) 0%, rgba(5, 3, 3, 0.98) 100%),
+                        linear-gradient(rgba(255, 60, 0, 0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255, 60, 0, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
+        }
+
+        /* Animação de cinzas caindo */
+        #ash-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Scanline CRT FX */
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0, 0, 0, 0.3) 50%,
+                rgba(0, 0, 0, 0.3)
+            );
+            background-size: 100% 4px;
+            z-index: 40;
+            opacity: 0.6;
+        }
+
+        /* Glow e Bordas em Chama/Sinal */
+        .hazard-border {
+            border-image: repeating-linear-gradient(
+                -45deg,
+                #b91c1c,
+                #b91c1c 10px,
+                #18181b 10px,
+                #18181b 20px
+            ) 20;
+        }
+
+        .glow-orange {
+            box-shadow: 0 0 15px rgba(249, 115, 22, 0.3), inset 0 0 10px rgba(249, 115, 22, 0.1);
+        }
+        
+        .glow-red-pulse {
+            animation: pulse-red 2s infinite alternate;
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 5px rgba(220, 38, 38, 0.4); }
+            100% { box-shadow: 0 0 22px rgba(220, 38, 38, 0.8); }
+        }
+
+        /* Efeito de Glitch no Texto */
+        .glitch {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            clip: rect(0, 0, 0, 0);
+        }
+
+        .glitch::before {
+            left: -2px;
+            text-shadow: 2px 0 #ea580c;
+            animation: glitch-anim 3s infinite linear alternate-reverse;
+        }
+
+        .glitch::after {
+            left: 2px;
+            text-shadow: -2px 0 #dc2626;
+            animation: glitch-anim2 2s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(12px, 9999px, 44px, 0); }
+            20% { clip: rect(32px, 9999px, 14px, 0); }
+            40% { clip: rect(2px, 9999px, 50px, 0); }
+            60% { clip: rect(25px, 9999px, 5px, 0); }
+            80% { clip: rect(40px, 9999px, 20px, 0); }
+            100% { clip: rect(10px, 9999px, 35px, 0); }
+        }
+
+        @keyframes glitch-anim2 {
+            0% { clip: rect(25px, 9999px, 10px, 0); }
+            25% { clip: rect(5px, 9999px, 30px, 0); }
+            50% { clip: rect(45px, 9999px, 12px, 0); }
+            75% { clip: rect(15px, 9999px, 55px, 0); }
+            100% { clip: rect(30px, 9999px, 2px, 0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #09090b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #78350f;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="apocalypse-bg min-h-screen flex items-center justify-center p-3 sm:p-6 relative select-none">
+    
+    <!-- Tela retro scanline -->
+    <div class="scanline"></div>
+
+    <!-- Canvas para Partículas de Cinza / Brasa -->
+    <canvas id="ash-canvas"></canvas>
+
+    <!-- Container Principal do Portal -->
+    <main class="w-full max-w-lg bg-zinc-950/90 border-2 border-orange-950/80 rounded-lg p-5 sm:p-8 relative z-10 backdrop-blur-md glow-red-pulse shadow-2xl">
+        
+        <!-- Faixa de Alerta Superior -->
+        <div class="hazard-border border-t-8 border-b-8 pt-1 pb-1 mb-6 text-center bg-black/60">
+            <span class="text-xs font-bold tracking-widest text-red-500 uppercase flex items-center justify-center gap-2">
+                <i class="fa-solid font-black fa-triangle-exclamation animate-bounce"></i>
+                ALERTA DE EMERGÊNCIA GLOBAL - NÍVEL 5
+                <i class="fa-solid font-black fa-triangle-exclamation animate-bounce"></i>
+            </span>
+        </div>
+
+        <!-- Cabeçalho & Título -->
+        <header class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-orange-950/40 border border-orange-600/50 mb-3 glow-orange">
+                <i class="fa-solid fa-radio text-2xl text-orange-500 animate-pulse"></i>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-black text-red-600 tracking-wider glitch uppercase" data-text="ÚLTIMA CONEXÃO DA HUMANIDADE">
+                ÚLTIMA CONEXÃO DA HUMANIDADE
+            </h1>
+            <p class="text-xs text-orange-400/80 mt-1 tracking-widest uppercase">
+                [ FREQUÊNCIA DE EMERGÊNCIA DELTA-9 ]
+            </p>
+        </header>
+
+        <!-- Mensagem de Contexto do Apocalipse -->
+        <section class="bg-black/70 border-l-2 border-orange-600 p-4 rounded mb-6 text-sm leading-relaxed text-zinc-300 relative">
+            <div class="absolute -top-3 left-3 bg-orange-950 text-orange-400 text-[10px] px-2 py-0.5 rounded border border-orange-700/50 uppercase">
+                Transmissão Prioritária
+            </div>
+            <p class="mt-1">
+                A infraestrutura do mundo exterior ruiu. O ar lá fora é tóxico e os satélites de longo alcance estão caindo. Esta rede Wi-Fi é transmitida a partir dos geradores subterrâneos do <span class="text-orange-400 font-semibold">BUNKER ALFA</span>.
+            </p>
+            <p class="mt-2 text-zinc-400 text-xs">
+                Utilize este sinal com extrema cautela. O consumo excessivo de banda atrai interferências indesejadas e consome nossas reservas de energia.
+            </p>
+        </section>
+
+        <!-- Painel de Status do Bunker / Sistema -->
+        <section class="grid grid-cols-3 gap-2 mb-6 text-center text-xs">
+            <div class="bg-zinc-900/90 border border-zinc-800 p-2 rounded">
+                <span class="block text-zinc-500 text-[10px] uppercase">Radiação Externa</span>
+                <span class="text-red-500 font-bold flex items-center justify-center gap-1 mt-0.5">
+                    <i class="fa-solid fa-radiation animate-spin" style="animation-duration: 8s;"></i> 8.4 Sv/h
+                </span>
+            </div>
+            <div class="bg-zinc-900/90 border border-zinc-800 p-2 rounded">
+                <span class="block text-zinc-500 text-[10px] uppercase">Sinal do Repetidor</span>
+                <span class="text-amber-500 font-bold flex items-center justify-center gap-1 mt-0.5">
+                    <i class="fa-solid fa-wifi"></i> 34% Estável
+                </span>
+            </div>
+            <div class="bg-zinc-900/90 border border-zinc-800 p-2 rounded">
+                <span class="block text-zinc-500 text-[10px] uppercase">Sobreviventes</span>
+                <span class="text-emerald-500 font-bold flex items-center justify-center gap-1 mt-0.5">
+                    <i class="fa-solid fa-users"></i> <span id="user-count">14</span> Online
+                </span>
+            </div>
+        </section>
+
+        <!-- Formulário do Portal Captivo -->
+        <form id="login-form" onsubmit="handleConnect(event)" class="space-y-4">
+            
+            <!-- Campo de Identificação -->
+            <div>
+                <label for="survivor-id" class="block text-xs uppercase text-orange-400/90 mb-1 font-bold">
+                    <i class="fa-solid fa-id-card mr-1"></i> Identificação / Código do Sobrevivente
+                </label>
+                <div class="relative">
+                    <input type="text" id="survivor-id" required
+                        placeholder="Ex: REFUGIADO-8802" 
+                        class="w-full bg-black/80 border border-orange-900/70 focus:border-orange-500 rounded p-3 text-sm text-zinc-100 placeholder-zinc-700 outline-none transition-all uppercase tracking-wider glow-orange">
+                    <i class="fa-solid fa-key absolute right-3 top-3.5 text-zinc-600 text-sm"></i>
+                </div>
+            </div>
+
+            <!-- Termos e Condições / Racionamento -->
+            <div class="flex items-start gap-2 pt-1">
+                <input type="checkbox" id="terms" required 
+                    class="mt-1 accent-orange-600 rounded bg-zinc-900 border-zinc-700 cursor-pointer focus:ring-0">
+                <label for="terms" class="text-xs text-zinc-400 cursor-pointer select-none leading-tight">
+                    Concordo com os <strong class="text-orange-400">Protocolos de Racionamento de Dados</strong> do Bunker e prometo não desperdiçar largura de banda em conteúdo fútil enquanto o apocalipse durar.
+                </label>
+            </div>
+
+            <!-- Botão de Conexão -->
+            <button type="submit" id="btn-submit"
+                class="w-full mt-2 bg-gradient-to-r from-red-700 via-orange-600 to-red-700 hover:from-red-600 hover:to-orange-500 text-black font-extrabold py-3.5 px-4 rounded font-orbitron tracking-widest uppercase transition-all shadow-lg hover:shadow-orange-600/30 active:scale-[0.99] flex items-center justify-center gap-2">
+                <i class="fa-solid fa-bolt"></i>
+                <span id="btn-text">CONECTAR AO SINAL DA REDE</span>
+            </button>
+        </form>
+
+        <!-- Área de Status de Conexão em Tempo Real -->
+        <div id="status-terminal" class="hidden mt-4 p-3 bg-black border border-orange-950 rounded text-xs text-green-400 font-mono">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="inline-block w-2 h-2 rounded-full bg-green-500 animate-ping"></span>
+                <span id="terminal-step">Inicializando autenticação de frequência...</span>
+            </div>
+            <div class="w-full bg-zinc-900 h-1.5 rounded overflow-hidden mt-2">
+                <div id="progress-bar" class="bg-gradient-to-r from-orange-600 to-green-500 h-full w-0 transition-all duration-300"></div>
+            </div>
+        </div>
+
+        <!-- Rodapé do Bunker -->
+        <footer class="mt-6 pt-4 border-t border-zinc-900 text-center text-[10px] text-zinc-600">
+            <p>BUNKER SURVIVAL OS v4.09 // NÚCLEO DE PROTOCOLO IPV6</p>
+            <p class="mt-0.5">SE ESTÁ LENDO ISSO, VOCÊ É A RESISTÊNCIA.</p>
+        </footer>
+    </main>
+
+    <!-- Lógica de Animações e Autenticação Simulada -->
+    <script>
+        // --- EFEITO DE ASH / BRASAS FLUTUANTES (CANVAS) ---
+        const canvas = document.getElementById('ash-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const particles = [];
+        const particleCount = 45;
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2.5 + 0.5,
+                speedY: Math.random() * 0.8 + 0.2,
+                speedX: (Math.random() - 0.5) * 0.5,
+                opacity: Math.random() * 0.7 + 0.3,
+                color: Math.random() > 0.4 ? '#f97316' : '#ef4444' // Laranja ou Vermelho
+            });
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(p => {
+                p.y -= p.speedY;
+                p.x += p.speedX;
+
+                // Reinicia a partícula se subir além da tela
+                if (p.y < -10) {
+                    p.y = canvas.height + 10;
+                    p.x = Math.random() * canvas.width;
+                }
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.opacity;
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = p.color;
+                ctx.fill();
+                ctx.shadowBlur = 0; // reset
+            });
+
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // --- SIMULAÇÃO DINÂMICA DE SOBREVIVENTES ---
+        setInterval(() => {
+            const countElem = document.getElementById('user-count');
+            let current = parseInt(countElem.innerText);
+            // Flutuação aleatória
+            const change = Math.random() > 0.6 ? (Math.random() > 0.5 ? 1 : -1) : 0;
+            const updated = Math.max(8, current + change);
+            countElem.innerText = updated;
+        }, 5000);
+
+        // --- LÓGICA DE SUBMISSÃO DO PORTAL ---
+        function handleConnect(event) {
+            event.preventDefault();
+
+            const submitBtn = document.getElementById('btn-submit');
+            const btnText = document.getElementById('btn-text');
+            const statusTerminal = document.getElementById('status-terminal');
+            const terminalStep = document.getElementById('terminal-step');
+            const progressBar = document.getElementById('progress-bar');
+            const survivorId = document.getElementById('survivor-id').value;
+
+            // Bloquear botão
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            btnText.innerText = "PROCESSANDO SINAL...";
+            
+            // Exibir terminal
+            statusTerminal.classList.remove('hidden');
+
+            const steps = [
+                { time: 500, text: `Verificando credenciais de "${survivorId}"...`, progress: '25%' },
+                { time: 1500, text: "Escaneando radiação nos nós da rede...", progress: '50%' },
+                { time: 2500, text: "Bypass de protocolos de segurança concluído.", progress: '75%' },
+                { time: 3500, text: "ACESSO CONCEDIDO! Conectando à World Wide Web...", progress: '100%' }
+            ];
+
+            steps.forEach(step => {
+                setTimeout(() => {
+                    terminalStep.innerText = step.text;
+                    progressBar.style.width = step.progress;
+
+                    if (step.progress === '100%') {
+                        setTimeout(() => {
+                            // Em um Captive Portal real, o formulário faz POST para a URL do roteador
+                            // Exemplo: event.target.submit();
+                            btnText.innerText = "SINAL ESTABELECIDO!";
+                            alert(`BEM-VINDO À REDE DO BUNKER, ${survivorId.toUpperCase()}.\n\nAproveite enquanto o sinal durar.`);
+                        }, 500);
+                    }
+                }, step.time);
+            });
+        }
+    </script>
+</body>
+</html>
